@@ -19,4 +19,112 @@
   .msg.bot{background:#fff;color:#222;border-radius:3px 13px 13px 13px;border:1px solid #eee;align-self:flex-start}
   .msg.user{background:#FF6B35;color:#fff;border-radius:13px 3px 13px 13px;align-self:flex-end}
   .msg.sys{background:#eee;color:#666;font-size:11px;align-self:center;border-radius:8px;padding:4px 10px}
-  .qr-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-
+  .qr-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+  .qr-btn{background:#fff;border:1px solid #FF6B35;color:#cc5520;border-radius:10px;padding:3px 10px;font-size:11px;cursor:pointer}
+  .qr-btn:hover{background:#FF6B35;color:#fff}
+  .typing{display:flex;gap:4px;align-items:center;padding:6px 2px}
+  .typing span{width:7px;height:7px;border-radius:50%;background:#bbb;animation:bounce 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:.2s}
+  .typing span:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+  .quick-tests{padding:7px 10px;background:#f5f5f3;border-top:1px solid #eee;display:flex;gap:5px;flex-wrap:wrap}
+  .qt{font-size:11px;padding:3px 9px;border-radius:9px;border:1px solid #ddd;background:#fff;color:#555;cursor:pointer}
+  .qt:hover{border-color:#FF6B35;color:#cc5520}
+  .input-row{padding:10px 12px;border-top:1px solid #eee;display:flex;gap:8px;background:#fff}
+  textarea{flex:1;border:1px solid #ddd;border-radius:18px;padding:8px 14px;font-size:13px;outline:none;resize:none;max-height:72px;line-height:1.4;color:#222}
+  textarea:focus{border-color:#FF6B35}
+  .send{width:36px;height:36px;border-radius:50%;border:none;background:#FF6B35;color:#fff;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .send:disabled{background:#ccc;cursor:default}
+  .info{font-size:10px;color:#aaa;padding:2px 12px 5px;background:#fff}
+</style>
+</head>
+<body>
+<div class="chat-wrap">
+  <div class="header">
+    <div class="av">🔥</div>
+    <div>
+      <div class="nm">Alex · Smokemania AI</div>
+      <div class="st">Consultant virtual · Online</div>
+    </div>
+  </div>
+  <div class="msgs" id="msgs">
+    <div class="msg sys">Salut! Scrie un mesaj sau alege un scenariu de test.</div>
+  </div>
+  <div class="quick-tests">
+    <button class="qt" onclick="sq('Salut, vreau sa incep sa fumez electronic, nu stiu nimic')">Incepator</button>
+    <button class="qt" onclick="sq('Ce rezistenta se potriveste la Vaporesso Xros 5 Pro?')">Compatibilitate</button>
+    <button class="qt" onclick="sq('Vreau 60ml cu 6mg nicotina, cat shot imi trebuie?')">Nicotina</button>
+    <button class="qt" onclick="sq('Cand imi vine comanda? am pus-o ieri seara')">Livrare</button>
+    <button class="qt" onclick="sq('Vreau sa fac retur, cum procedez?')">Retur</button>
+    <button class="qt" onclick="sq('Produsul meu s-a defectat, cum fac garantie?')">Garantie</button>
+    <button class="qt" onclick="clr()">Reset</button>
+  </div>
+  <div class="input-row">
+    <textarea id="inp" rows="1" placeholder="Scrie ca un client..."></textarea>
+    <button class="send" id="sbtn" onclick="send()">&#9658;</button>
+  </div>
+  <div class="info" id="info">Pregatit de test</div>
+</div>
+<script>
+const PROXY='https://icy-fog-264asmokemania-proxy.mardare-vic.workers.dev';
+let SID='test_'+Math.random().toString(36).substr(2,6);
+let busy=false,n=0;
+const M=document.getElementById('msgs');
+const I=document.getElementById('inp');
+const B=document.getElementById('sbtn');
+function addMsg(txt,cls,qr){
+  const d=document.createElement('div');
+  d.className='msg '+cls;
+  d.textContent=txt;
+  if(qr&&qr.length){
+    const w=document.createElement('div');
+    w.className='qr-wrap';
+    qr.forEach(q=>{
+      const b=document.createElement('button');
+      b.className='qr-btn';
+      b.textContent=q;
+      b.onclick=()=>{w.remove();sq(q);};
+      w.appendChild(b);
+    });
+    d.appendChild(w);
+  }
+  M.appendChild(d);
+  M.scrollTop=M.scrollHeight;
+}
+function showTyping(){
+  const d=document.createElement('div');
+  d.className='msg bot';d.id='typ';
+  d.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
+  M.appendChild(d);M.scrollTop=M.scrollHeight;
+}
+async function doSend(txt){
+  if(!txt.trim()||busy)return;
+  busy=true;B.disabled=true;n++;
+  addMsg(txt,'user');
+  showTyping();
+  const t0=Date.now();
+  try{
+    const r=await fetch(PROXY,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:txt,sessionId:SID})
+    });
+    const data=await r.json();
+    document.getElementById('typ').remove();
+    const reply=data.reply||data.output||data.text||JSON.stringify(data);
+    addMsg(reply,'bot',data.quickReplies||[]);
+    document.getElementById('info').textContent='Raspuns in '+((Date.now()-t0)/1000).toFixed(1)+'s · Sesiune: '+SID;
+  }catch(e){
+    document.getElementById('typ').remove();
+    addMsg('Eroare: '+e.message,'bot');
+  }
+  busy=false;B.disabled=false;I.focus();
+}
+function send(){const t=I.value.trim();I.value='';I.style.height='auto';doSend(t);}
+function sq(t){doSend(t);}
+function clr(){M.innerHTML='<div class="msg sys">Chat resetat.</div>';n=0;SID='test_'+Math.random().toString(36).substr(2,6);document.getElementById('info').textContent='Pregatit de test';}
+I.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+I.addEventListener('input',()=>{I.style.height='auto';I.style.height=Math.min(I.scrollHeight,72)+'px';});
+</script>
+</body>
+</html>
