@@ -3,133 +3,238 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vapers-One AI — Chat cu Vapy</title>
+<title>Vapy · Vapers-One AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-  body{background:#f0f2f5;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
-  .chat-wrap{width:420px;height:620px;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.15);background:#fff}
-  .header{background:#4A7FBD;padding:14px 16px;display:flex;align-items:center;gap:10px}
-  .header .av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:18px}
-  .header .nm{font-weight:600;font-size:15px;color:#fff}
-  .header .st{font-size:11px;color:rgba(255,255,255,0.85)}
-  .msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#f8f9fb}
-  .msgs::-webkit-scrollbar{width:3px}
-  .msgs::-webkit-scrollbar-thumb{background:#ddd}
-  .msg{max-width:82%;padding:9px 13px;border-radius:13px;font-size:13.5px;line-height:1.5;white-space:pre-wrap}
-  .msg.bot{background:#fff;color:#222;border-radius:3px 13px 13px 13px;border:1px solid #eee;align-self:flex-start}
-  .msg.user{background:#4A7FBD;color:#fff;border-radius:13px 3px 13px 13px;align-self:flex-end}
-  .msg.sys{background:#eee;color:#666;font-size:11px;align-self:center;border-radius:8px;padding:4px 10px}
-  .qr-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
-  .qr-btn{background:#fff;border:1px solid #4A7FBD;color:#2d5a8e;border-radius:10px;padding:3px 10px;font-size:11px;cursor:pointer}
-  .qr-btn:hover{background:#4A7FBD;color:#fff}
-  .typing{display:flex;gap:4px;align-items:center;padding:6px 2px}
-  .typing span{width:7px;height:7px;border-radius:50%;background:#bbb;animation:bounce 1.2s infinite}
-  .typing span:nth-child(2){animation-delay:.2s}
-  .typing span:nth-child(3){animation-delay:.4s}
-  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-  .quick-tests{padding:7px 10px;background:#f0f2f5;border-top:1px solid #eee;display:flex;gap:5px;flex-wrap:wrap}
-  .qt{font-size:11px;padding:3px 9px;border-radius:9px;border:1px solid #ddd;background:#fff;color:#555;cursor:pointer}
-  .qt:hover{border-color:#4A7FBD;color:#2d5a8e}
-  .input-row{padding:10px 12px;border-top:1px solid #eee;display:flex;gap:8px;background:#fff}
-  textarea{flex:1;border:1px solid #ddd;border-radius:18px;padding:8px 14px;font-size:13px;outline:none;resize:none;max-height:72px;line-height:1.4;color:#222}
-  textarea:focus{border-color:#4A7FBD}
-  .send{width:36px;height:36px;border-radius:50%;border:none;background:#4A7FBD;color:#fff;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .send:disabled{background:#ccc;cursor:default}
-  .info{font-size:10px;color:#aaa;padding:2px 12px 5px;background:#fff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#0a0a0a;min-height:100vh}
+
+#vapy-btn{position:fixed;bottom:25px;right:25px;width:64px;height:64px;border:none;border-radius:50%;background:linear-gradient(135deg,#4A7FBD,#2b5e98);cursor:pointer;z-index:999999;box-shadow:0 8px 30px rgba(74,127,189,.5);display:flex;align-items:center;justify-content:center;transition:.3s}
+#vapy-btn:hover{transform:scale(1.08)}
+#vapy-btn svg{width:28px;height:28px;fill:white}
+#vapy-notif{position:absolute;top:4px;right:4px;width:12px;height:12px;background:#e74c3c;border-radius:50%;border:2px solid #0a0a0a;display:none}
+
+#vapy-chat{position:fixed;bottom:100px;right:25px;width:370px;height:580px;background:#111;border-radius:24px;overflow:hidden;z-index:999998;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 60px rgba(0,0,0,.6);opacity:0;pointer-events:none;transform:translateY(20px) scale(.95);transition:.35s}
+#vapy-chat.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
+
+.vap-header{padding:16px 18px;background:#161616;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:12px}
+.vap-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#4A7FBD,#2b5e98);display:flex;align-items:center;justify-content:center;font-size:18px}
+.vap-name{color:white;font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700}
+.vap-status{color:#22c55e;font-size:12px}
+
+#vapy-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#0d0d0d;scrollbar-width:thin;scrollbar-color:rgba(74,127,189,.2) transparent}
+#vapy-messages::-webkit-scrollbar{width:3px}
+#vapy-messages::-webkit-scrollbar-thumb{background:rgba(74,127,189,.2);border-radius:3px}
+
+.vap-wrap{display:flex;flex-direction:column}
+.vap-wrap.is-user{align-items:flex-end}
+.vap-wrap.is-bot{align-items:flex-start}
+.vap-msg{max-width:83%;padding:11px 14px;border-radius:16px;line-height:1.55;font-size:13.5px;animation:vfade .25s ease}
+.vap-user{background:linear-gradient(135deg,#4A7FBD,#2b5e98);color:white;border-bottom-right-radius:4px}
+.vap-bot{background:#1d1d1d;border:1px solid rgba(255,255,255,.05);color:#f2f2f2;border-bottom-left-radius:4px}
+.vap-time{font-size:10px;color:#555;margin-top:3px;padding:0 2px}
+@keyframes vfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.vap-welcome{text-align:center;padding:24px 16px}
+.vap-welcome-icon{font-size:40px;display:block;margin-bottom:12px}
+.vap-welcome h3{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:8px}
+.vap-welcome p{font-size:13px;color:#666;line-height:1.5}
+.vap-divider{text-align:center;font-size:11px;color:#333;padding:4px 0}
+
+.vap-feedback{display:flex;align-items:center;gap:6px;margin-top:5px}
+.vap-fblabel{font-size:10px;color:#555}
+.vap-fbtn{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:3px 10px;cursor:pointer;font-size:12px;color:#666;transition:.2s}
+.vap-fbtn:hover{background:rgba(255,255,255,.1)}
+.vap-fbtn.liked{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#22c55e}
+.vap-fbtn.disliked{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.4);color:#ef4444}
+.vap-fbtn.done{pointer-events:none;opacity:.5}
+
+.vap-qrs{display:flex;flex-wrap:wrap;gap:6px;padding:6px 14px 8px}
+.vap-qr{background:rgba(74,127,189,.08);border:1px solid rgba(74,127,189,.3);color:#6fa3d8;padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;white-space:nowrap;transition:.2s}
+.vap-qr:hover{background:rgba(74,127,189,.2);color:white}
+
+.vap-typing{display:flex;gap:5px;padding:8px 2px;align-items:center}
+.vap-dot{width:8px;height:8px;border-radius:50%;background:#4A7FBD;animation:vtyp 1.2s infinite}
+.vap-dot:nth-child(2){animation-delay:.2s}
+.vap-dot:nth-child(3){animation-delay:.4s}
+@keyframes vtyp{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+
+.vap-bottom{padding:12px 14px;background:#111;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:10px}
+#vapy-input{flex:1;background:#1b1b1b;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:11px 14px;color:white;outline:none;font-size:14px;font-family:'DM Sans',sans-serif}
+#vapy-input::placeholder{color:#555}
+#vapy-send{width:46px;height:46px;border:none;border-radius:50%;background:linear-gradient(135deg,#4A7FBD,#2b5e98);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.25s;flex-shrink:0}
+#vapy-send:hover{transform:scale(1.06)}
+#vapy-send svg{width:18px;height:18px;stroke:white}
+#vapy-send:disabled{opacity:.4;cursor:not-allowed}
+
+@media(max-width:480px){#vapy-chat{width:calc(100vw - 20px);right:10px;bottom:90px}}
 </style>
 </head>
 <body>
-<div class="chat-wrap">
-  <div class="header">
-    <div class="av">💨</div>
-    <div>
-      <div class="nm">Vapy · Vapers-One AI</div>
-      <div class="st">Consultant virtual · Online</div>
+
+<button id="vapy-btn" aria-label="Chat cu Vapy">
+  <div id="vapy-notif"></div>
+  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</button>
+
+<div id="vapy-chat">
+  <div class="vap-header">
+    <div class="vap-avatar">💨</div>
+    <div style="flex:1">
+      <div class="vap-name">Vapy · Asistent Vapers-One</div>
+      <div class="vap-status">● Online acum</div>
     </div>
   </div>
-  <div class="msgs" id="msgs">
-    <div class="msg sys">Salut! Scrie un mesaj sau alege un scenariu de test.</div>
+
+  <div id="vapy-messages">
+    <div class="vap-welcome">
+      <span class="vap-welcome-icon">💨</span>
+      <h3>Salut! Sunt Vapy 👋</h3>
+      <p>Asistentul tău pentru țigări electronice, lichide și accesorii. Cum te pot ajuta azi?</p>
+    </div>
+    <div class="vap-divider">începe conversația</div>
   </div>
-  <div class="quick-tests">
-    <button class="qt" onclick="sq('Salut, vreau sa incep sa fumez electronic')">Incepator</button>
-    <button class="qt" onclick="sq('Ce kituri aveti disponibile?')">Kituri</button>
-    <button class="qt" onclick="sq('Am un longfill cu 24ml aroma in sticla de 100ml, vreau 12mg cu shot-uri de 20mg')">Calcul nicotina</button>
-    <button class="qt" onclick="sq('Cand imi vine comanda?')">Livrare</button>
-    <button class="qt" onclick="sq('Vreau sa fac retur')">Retur</button>
-    <button class="qt" onclick="sq('Vreau sa vorbesc cu un om')">Contact</button>
-    <button class="qt" onclick="clr()">Reset</button>
+
+  <div class="vap-qrs" id="vapy-iqr">
+    <button class="vap-qr" onclick="sendMessage('Produse disponibile')">🛒 Produse</button>
+    <button class="vap-qr" onclick="sendMessage('Prețuri și oferte')">💰 Prețuri</button>
+    <button class="vap-qr" onclick="sendMessage('Livrare')">🚚 Livrare</button>
+    <button class="vap-qr" onclick="sendMessage('Vreau să vorbesc cu un om')">📞 Contact</button>
   </div>
-  <div class="input-row">
-    <textarea id="inp" rows="1" placeholder="Scrie ca un client..."></textarea>
-    <button class="send" id="sbtn" onclick="send()">&#9658;</button>
+
+  <div class="vap-bottom">
+    <input id="vapy-input" type="text" placeholder="Scrie un mesaj...">
+    <button id="vapy-send">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M22 2L11 13" stroke-width="2" stroke-linecap="round"/>
+        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+    </button>
   </div>
-  <div class="info" id="info">Pregatit de test</div>
 </div>
+
 <script>
-const PROXY='https://icy-fog-264asmokemania-proxy.mardare-vic.workers.dev';
-let SID='test_'+Math.random().toString(36).substr(2,6);
-let busy=false,n=0;
-const M=document.getElementById('msgs');
-const I=document.getElementById('inp');
-const B=document.getElementById('sbtn');
+const WEBHOOK = 'https://digitalharmony.app.n8n.cloud/webhook/Vapers-one-chat';
+const sessionId = 'vap-' + Math.random().toString(36).substring(2);
+let isLoading = false;
+let msgCount = 0;
 
-function addMsg(txt,cls,qr){
-  const d=document.createElement('div');
-  d.className='msg '+cls;
-  d.textContent=txt;
-  if(qr&&qr.length){
-    const w=document.createElement('div');
-    w.className='qr-wrap';
-    qr.forEach(q=>{
-      const b=document.createElement('button');
-      b.className='qr-btn';
-      b.textContent=q;
-      b.onclick=()=>{w.remove();sq(q);};
-      w.appendChild(b);
+const btn = document.getElementById('vapy-btn');
+const chat = document.getElementById('vapy-chat');
+const messages = document.getElementById('vapy-messages');
+const input = document.getElementById('vapy-input');
+const sendBtn = document.getElementById('vapy-send');
+const notif = document.getElementById('vapy-notif');
+const iqr = document.getElementById('vapy-iqr');
+
+setTimeout(() => { if(!chat.classList.contains('open')) notif.style.display = 'block'; }, 4000);
+
+btn.addEventListener('click', () => {
+  chat.classList.toggle('open');
+  notif.style.display = 'none';
+  if(chat.classList.contains('open')) setTimeout(() => input.focus(), 300);
+});
+
+function getTime() {
+  const d = new Date(), h = d.getHours(), m = d.getMinutes();
+  return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;
+}
+
+function addMessage(type, text) {
+  iqr.style.display = 'none';
+  const wrap = document.createElement('div');
+  wrap.className = 'vap-wrap ' + (type === 'user' ? 'is-user' : 'is-bot');
+  const div = document.createElement('div');
+  div.className = 'vap-msg ' + (type === 'user' ? 'vap-user' : 'vap-bot');
+  div.innerHTML = text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  const time = document.createElement('div');
+  time.className = 'vap-time';
+  time.textContent = getTime();
+  wrap.appendChild(div);
+  wrap.appendChild(time);
+  messages.appendChild(wrap);
+  scrollBottom();
+  return wrap;
+}
+
+function addFeedback(wrap) {
+  const mid = 'vm' + (++msgCount);
+  const fb = document.createElement('div');
+  fb.className = 'vap-feedback';
+  fb.innerHTML = `<span class="vap-fblabel">Util?</span>
+    <button class="vap-fbtn" id="lk-${mid}" onclick="doFeedback('${mid}','like')">👍</button>
+    <button class="vap-fbtn" id="dk-${mid}" onclick="doFeedback('${mid}','dislike')">👎</button>`;
+  wrap.appendChild(fb);
+}
+
+function doFeedback(mid, type) {
+  document.getElementById('lk-'+mid).classList.add(type==='like'?'liked':'done');
+  document.getElementById('dk-'+mid).classList.add(type==='dislike'?'disliked':'done');
+  fetch(WEBHOOK, {method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({feedback:true,feedbackType:type,messageId:mid,sessionId,timestamp:new Date().toISOString()})
+  }).catch(()=>{});
+}
+
+function addQuickReplies(replies) {
+  const old = document.getElementById('vapy-dqr');
+  if(old) old.remove();
+  const c = document.createElement('div');
+  c.className = 'vap-qrs';
+  c.id = 'vapy-dqr';
+  replies.forEach(r => {
+    const b = document.createElement('button');
+    b.className = 'vap-qr';
+    b.textContent = r;
+    b.onclick = () => { c.remove(); sendMessage(r); };
+    c.appendChild(b);
+  });
+  document.querySelector('.vap-bottom').before(c);
+}
+
+function addTyping() {
+  const wrap = document.createElement('div');
+  wrap.className = 'vap-wrap is-bot';
+  wrap.innerHTML = '<div class="vap-msg vap-bot"><div class="vap-typing"><div class="vap-dot"></div><div class="vap-dot"></div><div class="vap-dot"></div></div></div>';
+  messages.appendChild(wrap);
+  scrollBottom();
+  return wrap;
+}
+
+function scrollBottom() { messages.scrollTop = messages.scrollHeight; }
+
+async function sendMessage(text) {
+  if(!text || !text.trim() || isLoading) return;
+  const dqr = document.getElementById('vapy-dqr');
+  if(dqr) dqr.remove();
+  addMessage('user', text.trim());
+  input.value = '';
+  const typing = addTyping();
+  isLoading = true;
+  sendBtn.disabled = true;
+  try {
+    const res = await fetch(WEBHOOK, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: text.trim(), sessionId})
     });
-    d.appendChild(w);
+    if(!res.ok) throw new Error('');
+    const data = await res.json();
+    typing.remove();
+    const reply = data.reply || data.message || 'Momentan nu pot răspunde.';
+    const wrap = addMessage('bot', reply);
+    addFeedback(wrap);
+    if(data.quickReplies && data.quickReplies.length) addQuickReplies(data.quickReplies);
+  } catch(e) {
+    typing.remove();
+    addMessage('bot', 'Conexiune indisponibilă momentan. Încearcă din nou.');
   }
-  M.appendChild(d);
-  M.scrollTop=M.scrollHeight;
+  isLoading = false;
+  sendBtn.disabled = false;
+  input.focus();
 }
 
-function showTyping(){
-  const d=document.createElement('div');
-  d.className='msg bot';d.id='typ';
-  d.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
-  M.appendChild(d);M.scrollTop=M.scrollHeight;
-}
-
-async function doSend(txt){
-  if(!txt.trim()||busy)return;
-  busy=true;B.disabled=true;n++;
-  addMsg(txt,'user');
-  showTyping();
-  const t0=Date.now();
-  try{
-    const r=await fetch(PROXY,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:txt,sessionId:SID})
-    });
-    const data=await r.json();
-    document.getElementById('typ').remove();
-    const reply=data.reply||data.output||data.text||JSON.stringify(data);
-    addMsg(reply,'bot',data.quickReplies||[]);
-    document.getElementById('info').textContent='Raspuns in '+((Date.now()-t0)/1000).toFixed(1)+'s · Sesiune: '+SID;
-  }catch(e){
-    document.getElementById('typ').remove();
-    addMsg('Eroare: '+e.message,'bot');
-  }
-  busy=false;B.disabled=false;I.focus();
-}
-
-function send(){const t=I.value.trim();I.value='';I.style.height='auto';doSend(t);}
-function sq(t){doSend(t);}
-function clr(){M.innerHTML='<div class="msg sys">Chat resetat.</div>';n=0;SID='test_'+Math.random().toString(36).substr(2,6);document.getElementById('info').textContent='Pregatit de test';}
-
-I.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
-I.addEventListener('input',()=>{I.style.height='auto';I.style.height=Math.min(I.scrollHeight,72)+'px';});
+sendBtn.addEventListener('click', () => sendMessage(input.value));
+input.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); sendMessage(input.value); } });
 </script>
 </body>
 </html>
