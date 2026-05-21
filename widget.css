@@ -1,0 +1,44 @@
+#vapy-btn{position:fixed;bottom:25px;right:25px;width:64px;height:64px;border:none;border-radius:50%;background:linear-gradient(135deg,#4A7FBD,#2b5e98);cursor:pointer;z-index:999999;box-shadow:0 8px 30px rgba(74,127,189,.5);display:flex;align-items:center;justify-content:center;transition:.3s}
+#vapy-btn:hover{transform:scale(1.08)}
+#vapy-btn svg{width:28px;height:28px;fill:white}
+#vapy-notif{position:absolute;top:4px;right:4px;width:12px;height:12px;background:#e74c3c;border-radius:50%;border:2px solid white;display:none}
+#vapy-chat{position:fixed;bottom:100px;right:25px;width:370px;height:580px;background:#111;border-radius:24px;overflow:hidden;z-index:999998;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 60px rgba(0,0,0,.6);opacity:0;pointer-events:none;transform:translateY(20px) scale(.95);transition:.35s}
+#vapy-chat.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
+.vap-header{padding:16px 18px;background:#161616;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:12px}
+.vap-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#4A7FBD,#2b5e98);display:flex;align-items:center;justify-content:center;font-size:18px}
+.vap-name{color:white;font-family:Rajdhani,sans-serif;font-size:18px;font-weight:700}
+.vap-status{color:#22c55e;font-size:12px}
+#vapy-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#0d0d0d;scrollbar-width:thin;scrollbar-color:rgba(74,127,189,.2) transparent}
+#vapy-messages::-webkit-scrollbar{width:3px}
+#vapy-messages::-webkit-scrollbar-thumb{background:rgba(74,127,189,.2);border-radius:3px}
+.vap-wrap{display:flex;flex-direction:column}
+.vap-wrap.is-user{align-items:flex-end}
+.vap-wrap.is-bot{align-items:flex-start}
+.vap-msg{max-width:83%;padding:11px 14px;border-radius:16px;line-height:1.55;font-size:13.5px;animation:vfade .25s ease}
+.vap-user{background:linear-gradient(135deg,#4A7FBD,#2b5e98);color:white;border-bottom-right-radius:4px}
+.vap-bot{background:#1d1d1d;border:1px solid rgba(255,255,255,.05);color:#f2f2f2;border-bottom-left-radius:4px}
+.vap-time{font-size:10px;color:#555;margin-top:3px;padding:0 2px}
+@keyframes vfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.vap-feedback{display:flex;align-items:center;gap:6px;margin-top:5px}
+.vap-fblabel{font-size:10px;color:#555}
+.vap-fbtn{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:3px 10px;cursor:pointer;font-size:12px;color:#666;transition:.2s}
+.vap-fbtn:hover{background:rgba(255,255,255,.1)}
+.vap-fbtn.liked{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#22c55e}
+.vap-fbtn.disliked{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.4);color:#ef4444}
+.vap-fbtn.done{pointer-events:none;opacity:.5}
+.vap-qrs{display:flex;flex-wrap:wrap;gap:6px;padding:6px 14px 8px}
+.vap-qr{background:rgba(74,127,189,.08);border:1px solid rgba(74,127,189,.3);color:#6fa3d8;padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;white-space:nowrap;transition:.2s}
+.vap-qr:hover{background:rgba(74,127,189,.2);color:white}
+.vap-typing{display:flex;gap:5px;padding:8px 2px;align-items:center}
+.vap-dot{width:8px;height:8px;border-radius:50%;background:#4A7FBD;animation:vtyp 1.2s infinite}
+.vap-dot:nth-child(2){animation-delay:.2s}
+.vap-dot:nth-child(3){animation-delay:.4s}
+@keyframes vtyp{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+.vap-bottom{padding:12px 14px;background:#111;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:10px}
+#vapy-input{flex:1;background:#1b1b1b;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:11px 14px;color:white;outline:none;font-size:14px;font-family:"DM Sans",sans-serif}
+#vapy-input::placeholder{color:#555}
+#vapy-send{width:46px;height:46px;border:none;border-radius:50%;background:linear-gradient(135deg,#4A7FBD,#2b5e98);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.25s;flex-shrink:0}
+#vapy-send:hover{transform:scale(1.06)}
+#vapy-send svg{width:18px;height:18px;stroke:white}
+#vapy-send:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:480px){#vapy-chat{width:calc(100vw - 20px);right:10px;bottom:90px}}
